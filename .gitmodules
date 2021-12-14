@@ -1,0 +1,3 @@
+[submodule "hoppscotch"]
+	path = hoppscotch
+	url = git@github.com:hoppscotch/hoppscotch.git
