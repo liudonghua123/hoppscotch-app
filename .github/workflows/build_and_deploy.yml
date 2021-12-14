@@ -1,0 +1,205 @@
+name: CI_CD
+on:
+  push:
+    tags:
+      - "*"
+    branches:
+      - 'main'
+      - 'master'
+
+env:
+  APP_NAME: hoppscotch-app
+
+jobs:
+  build-depoly-files:
+    name: 'Build depoly files'
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Branch name
+        id: branch_name
+        run: |
+          echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
+          echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+          echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+        shell: bash
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: 'npm'
+      - name: 'Install pnpm and dependencies '
+        run: |
+          npm install -g pnpm
+          pnpm install
+        working-directory: hoppscotch
+      - name: 'Building'
+        run: |
+          mv packages/hoppscotch-app/.env.example packages/hoppscotch-app/.env
+          pnpm run generate
+        working-directory: hoppscotch
+      - name: Prepare build files achive
+        run: |
+          7z a -tzip ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip -r ./hoppscotch/packages/hoppscotch-app/dist/*
+        shell: bash
+      - uses: actions/upload-artifact@v2
+        with:
+          name: hoppscotch-dist
+          path: ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip
+      - name: 'Publish build files achive to release'
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          file: ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip
+          tags: true
+          draft: false
+          overwrite: true
+
+  build-native-executable:
+    name: 'Build native executable'
+    needs: [build-depoly-files]
+    if: contains(github.ref, 'tags')
+    strategy:
+      matrix:
+        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        include:
+          - os: 'ubuntu-latest'
+            label: 'linux'
+            executable_extension: ''
+          - os: 'macos-latest'
+            label: 'macos'
+            executable_extension: ''
+          - os: 'windows-latest'
+            label: 'windows'
+            executable_extension: '.exe'
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: Branch name
+        id: branch_name
+        run: |
+          echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
+          echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+          echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+        shell: bash
+      - uses: actions/download-artifact@v2
+        with:
+          name: hoppscotch-dist
+      - name: Extract hoppscotch-dist
+        run: |
+          rm -rf dist
+          unzip ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip -d dist
+        shell: bash
+      - name: Display structure of downloaded files
+        run: ls -l . dist
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: 'npm'
+      - name: check toolchain version
+        run: |
+          node --version
+          npm --version
+          rustc --version
+          cargo --version
+      - name: 'Setup for linux'
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update && sudo apt install libwebkit2gtk-4.0-dev \
+            build-essential \
+            curl \
+            wget \
+            libssl-dev \
+            libgtk-3-dev \
+            libappindicator3-dev \
+            patchelf \
+            librsvg2-dev
+      - name: 'Setup for macos'
+        if: matrix.os == 'macos-latest'
+        run: |
+          echo 'ok'
+      - name: 'Setup for windows'
+        if: matrix.os == 'windows-latest'
+        run: |
+          # choco install visualstudio2019-workload-vctools
+          # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md#visual-studio-enterprise-2019
+          echo 'ok'
+      - name: 'Build Native binarys'
+        run: |
+          echo "build native binarys..."
+          yarn
+          yarn tauri info
+          yarn tauri build
+          echo "build native binarys finished"
+      - name: Display structure of build files
+        run: |
+          ls -l src-tauri/target/release/
+          ls -lR src-tauri/target/release/bundle/
+        shell: bash
+      # - name: Edit binary resources on windows
+      #   if: matrix.os == 'windows-latest'
+      #   run: |
+      #     echo "edit binary resources"
+      #     ".\resources\rcedit-x64.exe" build/${{env.APP_NAME}}${{matrix.executable_extension}} -set-icon resources/app_icon.ico -set-file-version ${{steps.environment.outputs.PROJECT_VERSION}} -set-product-version ${{steps.environment.outputs.PROJECT_VERSION}}  -set-version-string ProductName ${{env.APP_NAME}} -set-version-string LegalCopyright MIT
+      #   shell: bash
+      # - name: Prepare release files
+      #   run: |
+      #     7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.environment.outputs.PROJECT_VERSION}}.zip -r ./build/*
+      #   shell: bash
+
+      # linux
+      # src-tauri/target/release/hoppscotch-app
+      # src-tauri/target/release/bundle/appimage/hoppscotch-app_2.1.0_amd64.AppImage
+      # src-tauri/target/release/bundle/deb/hoppscotch-app_2.1.0_amd64.deb
+      # macos
+      # src-tauri/target/release/hoppscotch-app
+      # src-tauri/target/release/bundle/dmg/hoppscotch-app_2.1.0_x64.dmg
+      # src-tauri/target/release/bundle/macos/hoppscotch-app.app
+      # windows
+      # src-tauri/target/release/hoppscotch-app.exe
+      # src-tauri/target/release/bundle/msi/hoppscotch-app_2.1.0_x64.msi
+      - name: Prepare release files on ${{matrix.label}}
+        continue-on-error: true
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mv src-tauri/target/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}${{matrix.executable_extension}}
+          mv src-tauri/target/release/bundle/appimage/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage
+          mv src-tauri/target/release/bundle/deb/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb
+        shell: bash
+      - name: Prepare release files on ${{matrix.label}}
+        continue-on-error: true
+        if: matrix.os == 'macos-latest'
+        run: |
+          mv src-tauri/target/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}${{matrix.executable_extension}}
+          mv src-tauri/target/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg
+          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}.app.zip ./src-tauri/target/release/bundle/macos/${{env.APP_NAME}}.app
+        shell: bash
+      - name: Prepare release files on ${{matrix.label}}
+        continue-on-error: true
+        if: matrix.os == 'windows-latest'
+        run: |
+          mv src-tauri/target/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}${{matrix.executable_extension}}
+          mv src-tauri/target/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi
+        shell: bash
+      - name: Display structure of build files
+        run: |
+          ls -l .
+        shell: bash
+      - name: 'Publish binary to release'
+        continue-on-error: true
+        uses: xresloader/upload-to-github-release@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        with:
+          file: ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}*
+          tags: true
+          draft: false
+          overwrite: true
