@@ -144,6 +144,7 @@ jobs:
           ls -l src-tauri/target/release/
           ls -lR src-tauri/target/release/bundle/
         shell: bash
+
       # - name: Edit binary resources on windows
       #   if: matrix.os == 'windows-latest'
       #   run: |
@@ -155,6 +156,7 @@ jobs:
       #     7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.environment.outputs.PROJECT_VERSION}}.zip -r ./build/*
       #   shell: bash
 
+      # the directory structure of build files
       # linux
       # src-tauri/target/release/hoppscotch-app
       # src-tauri/target/release/bundle/appimage/hoppscotch-app_2.1.0_amd64.AppImage
@@ -193,13 +195,31 @@ jobs:
         run: |
           ls -l .
         shell: bash
+        
+      # files prepared to publish to release
+      # platform executable
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}${{matrix.executable_extension}} 
+      # linux bundles
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb 
+      # macos bundles
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}.app.zip 
+      # windows bundles
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi         
       - name: 'Publish binary to release'
         continue-on-error: true
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          file: ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}*
+          file: >-
+            ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}${{matrix.executable_extension}} 
+            ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage 
+            ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb 
+            ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg 
+            ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}.app.zip 
+            ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi 
           tags: true
           draft: false
           overwrite: true
