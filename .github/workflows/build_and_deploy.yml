@@ -150,7 +150,6 @@ jobs:
           rustup target add i686-unknown-linux-gnu
           yarn
           yarn tauri info
-          yarn tauri build
           yarn tauri build -t x86_64-unknown-linux-gnu
           yarn tauri build -t i686-unknown-linux-gnu || true
           echo "build native binarys finished"
@@ -162,9 +161,8 @@ jobs:
           rustup target add aarch64-apple-darwin
           yarn
           yarn tauri info
-          yarn tauri build
           yarn tauri build -t x86_64-apple-darwin
-          yarn tauri build -t aarch64-apple-darwin || true
+          yarn tauri build -t aarch64-apple-darwin
           echo "build native binarys finished"
       - name: Build Native binarys on windows
         if: matrix.os == 'windows-latest'
@@ -174,7 +172,6 @@ jobs:
           rustup target add i686-pc-windows-msvc
           yarn
           yarn tauri info
-          yarn tauri build
           yarn tauri build -t x86_64-pc-windows-msvc
           yarn tauri build -t i686-pc-windows-msvc || true
           echo "build native binarys finished"
@@ -196,31 +193,39 @@ jobs:
 
       # the directory structure of build files
       # linux
-      # src-tauri/target/release/hoppscotch-app
-      # src-tauri/target/release/bundle/appimage/hoppscotch-app_2.1.0_amd64.AppImage
-      # src-tauri/target/release/bundle/deb/hoppscotch-app_2.1.0_amd64.deb
+      # src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app
+      # src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app_2.1.0_amd64.AppImage
+      # src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/hoppscotch-app_2.1.0_amd64.deb
       # macos
-      # src-tauri/target/release/hoppscotch-app
-      # src-tauri/target/release/bundle/dmg/hoppscotch-app_2.1.0_x64.dmg
-      # src-tauri/target/release/bundle/macos/hoppscotch-app.app
+      # src-tauri/target/x86_64-apple-darwin/release/hoppscotch-app
+      # src-tauri/target/x86_64-apple-darwin/release/bundle/macos/hoppscotch-app.app
+      # src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/hoppscotch-app_2.1.0_x64.dmg
+      # src-tauri/target/aarch64-apple-darwin/release/hoppscotch-app
+      # src-tauri/target/aarch64-apple-darwin/release/bundle/macos/hoppscotch-app.app
+      # src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/hoppscotch-app_2.1.0_aarch64.dmg
       # windows
-      # src-tauri/target/release/hoppscotch-app.exe
-      # src-tauri/target/release/bundle/msi/hoppscotch-app_2.1.0_x64.msi
+      # src-tauri/target/x86_64-pc-windows-msvc/release/hoppscotch-app.exe
+      # src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/hoppscotch-app_2.1.0_x64.msi
+      # src-tauri/target/i686-pc-windows-msvc/release/hoppscotch-app.exe
+      # src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/hoppscotch-app_2.1.0_x64.msi
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
         if: matrix.os == 'ubuntu-latest'
         run: |
-          mv src-tauri/target/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64${{matrix.executable_extension}}
-          mv src-tauri/target/release/bundle/appimage/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage
-          mv src-tauri/target/release/bundle/deb/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb
         shell: bash
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
         if: matrix.os == 'macos-latest'
         run: |
-          mv src-tauri/target/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64${{matrix.executable_extension}}
-          mv src-tauri/target/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}.app.zip ./src-tauri/target/release/bundle/macos/${{env.APP_NAME}}.app
+          mv src-tauri/target/x86_64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg
+          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.app.zip ./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
+          mv src-tauri/target/aarch64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64${{matrix.executable_extension}}
+          mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.dmg
+          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.app.zip ./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
         shell: bash
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
@@ -246,11 +251,14 @@ jobs:
       # macos bundles
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64 
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}.app.zip 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.app.zip 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.dmg 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.app.zip 
       # windows bundles
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.exe
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86.exe
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86.exe
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86.msi
       - name: 'Publish binary to release'
         continue-on-error: true
