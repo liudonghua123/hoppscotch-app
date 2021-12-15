@@ -132,17 +132,41 @@ jobs:
           # choco install visualstudio2019-workload-vctools
           # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md#visual-studio-enterprise-2019
           echo 'ok'
-      - name: 'Build Native binarys'
+      - name: Build Native binarys on ${{matrix.os}}
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "build native binarys..."
+          rustup target add x86_64-unknown-linux-gnu
+          rustup target add i686-unknown-linux-gnu
+          yarn
+          yarn tauri info
+          yarn tauri build
+          yarn tauri build -t x86_64-unknown-linux-gnu
+          yarn tauri build -t i686-unknown-linux-gnu
+          echo "build native binarys finished"
+      - name: Build Native binarys on ${{matrix.os}}
+        if: matrix.os == 'macos-latest'
         run: |
           echo "build native binarys..."
           yarn
           yarn tauri info
           yarn tauri build
           echo "build native binarys finished"
+      - name: Build Native binarys on ${{matrix.os}}
+        if: matrix.os == 'windows-latest'
+        run: |
+          echo "build native binarys..."
+          rustup target add x86_64-pc-windows-msvc
+          rustup target add i686-pc-windows-msvc
+          yarn
+          yarn tauri info
+          yarn tauri build
+          yarn tauri build -t x86_64-pc-windows-msvc
+          yarn tauri build -t i686-pc-windows-msvc
+          echo "build native binarys finished"
       - name: Display structure of build files
         run: |
-          ls -l src-tauri/target/release/
-          ls -lR src-tauri/target/release/bundle/
+          ls -lR src-tauri/target/
         shell: bash
 
       # - name: Edit binary resources on windows
@@ -188,8 +212,10 @@ jobs:
         continue-on-error: true
         if: matrix.os == 'windows-latest'
         run: |
-          mv src-tauri/target/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}${{matrix.executable_extension}}
-          mv src-tauri/target/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi
+          mv src-tauri/target/x86_64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi
+          mv src-tauri/target/i686-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86${{matrix.executable_extension}}
+          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x86.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86.msi
         shell: bash
       - name: Display structure of build files
         run: |
