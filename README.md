@@ -15,11 +15,18 @@ This is hoppscotch desktop app, running in an [Tauri](https://tauri.studio/) app
     </td>
     <td>
       <span>64-bit</span>
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-windows-2.1.0_x64.exe">
+        📦 Executable
+      </a> |
       <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-windows-2.1.0_x64.msi">
         💿 MSI Installer
-      </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-windows-2.1.0.exe">
+      </a><br />
+      <span>32-bit</span>
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-windows-2.1.0_x86.exe">
         📦 Executable
+      </a> |
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-windows-2.1.0_x86.msi">
+        💿 MSI Installer
       </a><br />
       <span>
         ❓ Don't know what kind of chip you have? Hit start, enter "processor" for info.
@@ -32,17 +39,25 @@ This is hoppscotch desktop app, running in an [Tauri](https://tauri.studio/) app
       macOS
     </td>
     <td>
-      <span>64-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0">
+      <span>Intel Processor</span>
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0_x64">
         📦 Executable
-      </a><br />
-      <span>64-bit</span>
+      </a> |
       <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0_x64.dmg">
-        📦 DMG bundle
+        💿 DMG bundle
+      </a> |
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0_x64.app.zip">
+        💿 APP bundle
       </a><br />
-      <span>64-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0.app.zip">
-        📦 APP bundle
+      <span>Apple M1 Processor</span>
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0_aarch64">
+        📦 Executable
+      </a> |
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0_aarch64.dmg">
+        💿 DMG bundle
+      </a> |
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-macos-2.1.0_aarch64.app.zip">
+        💿 APP bundle
       </a><br />
       <span>
         ❓ Don't know what kind of chip you have? Learn more at <a href="https://support.apple.com/en-us/HT211814">apple.com</a>.
@@ -56,16 +71,14 @@ This is hoppscotch desktop app, running in an [Tauri](https://tauri.studio/) app
     </td>
     <td>
       <span>64-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-linux-2.1.0">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-linux-2.1.0_amd64">
         📦 Executable
-      </a><br />
-      <span>64-bit</span>
+      </a> |
       <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-linux-2.1.0_amd64.AppImage">
-        📦 AppImage bundle
-      </a><br />
-      <span>64-bit</span>
+        💿 AppImage bundle
+      </a> |
       <a href="https://github.com/liudonghua123/hoppscotch-app/releases/download/2.1.0/hoppscotch-app-linux-2.1.0_amd64.deb">
-        📦 DEB bundle
+        💿 DEB bundle
       </a>
     </td>
   </tr>
