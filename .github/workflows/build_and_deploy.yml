@@ -121,17 +121,20 @@ jobs:
           sudo add-apt-repository universe
           sudo dpkg --add-architecture i386 
           sudo apt update
+          # sudo apt upgrade
           sudo apt install -y \
             libwebkit2gtk-4.0-dev \
             build-essential \
             curl \
             wget \
             libssl-dev \
+            libssl-dev:i386 \
             libgtk-3-dev \
             patchelf \
             librsvg2-dev \
             libappindicator3-dev \
-            libssl-dev:i386
+            gcc-multilib \
+            g++-multilib
       - name: 'Setup for macos'
         if: matrix.os == 'macos-latest'
         run: |
@@ -151,6 +154,8 @@ jobs:
           yarn
           yarn tauri info
           yarn tauri build -t x86_64-unknown-linux-gnu
+          export OPENSSL_LIB_DIR=/usr/lib/i386-linux-gnu/
+          export OPENSSL_INCLUDE_DIR=/usr/include/openssl/
           yarn tauri build -t i686-unknown-linux-gnu || true
           echo "build native binarys finished"
       - name: Build Native binarys on macos
