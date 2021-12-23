@@ -19,6 +19,13 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
+      - name: 'Checkout hoppscotch main submodules'
+        run: |
+          git checkout main
+          git pull
+          git branch
+          git log -n 3
+        working-directory: hoppscotch
       - name: Branch name
         id: branch_name
         run: |
