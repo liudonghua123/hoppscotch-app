@@ -22,6 +22,8 @@ jobs:
       - name: Branch name
         id: branch_name
         run: |
+          PROJECT_VERSION=`jq -r .package.version src-tauri/tauri.conf.json`
+          echo ::set-output name=PROJECT_VERSION::${PROJECT_VERSION}
           echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
           echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
           echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
@@ -43,18 +45,18 @@ jobs:
         working-directory: hoppscotch
       - name: Prepare build files achive
         run: |
-          7z a -tzip ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip -r ./hoppscotch/packages/hoppscotch-app/dist/*
+          7z a -tzip ${{env.APP_NAME}}-${{steps.branch_name.outputs.PROJECT_VERSION}}.zip -r ./hoppscotch/packages/hoppscotch-app/dist/*
         shell: bash
       - uses: actions/upload-artifact@v2
         with:
           name: hoppscotch-dist
-          path: ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip
+          path: ${{env.APP_NAME}}-${{steps.branch_name.outputs.PROJECT_VERSION}}.zip
       - name: 'Publish build files achive to release'
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          file: ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip
+          file: ${{env.APP_NAME}}-${{steps.branch_name.outputs.PROJECT_VERSION}}.zip
           tags: true
           draft: false
           overwrite: true
@@ -85,6 +87,8 @@ jobs:
       - name: Branch name
         id: branch_name
         run: |
+          PROJECT_VERSION=`jq -r .package.version src-tauri/tauri.conf.json`
+          echo ::set-output name=PROJECT_VERSION::${PROJECT_VERSION}
           echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
           echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
           echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
@@ -95,7 +99,7 @@ jobs:
       - name: Extract hoppscotch-dist
         run: |
           rm -rf dist
-          unzip ${{env.APP_NAME}}-${{steps.branch_name.outputs.SOURCE_NAME}}.zip -d dist
+          unzip ${{env.APP_NAME}}-${{steps.branch_name.outputs.PROJECT_VERSION}}.zip -d dist
         shell: bash
       - name: Display structure of downloaded files
         run: ls -l . dist
@@ -217,29 +221,29 @@ jobs:
         continue-on-error: true
         if: matrix.os == 'ubuntu-latest'
         run: |
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.AppImage
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.deb
         shell: bash
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
         if: matrix.os == 'macos-latest'
         run: |
-          mv src-tauri/target/x86_64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.app.zip ./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
-          mv src-tauri/target/aarch64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64${{matrix.executable_extension}}
-          mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.app.zip ./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
+          mv src-tauri/target/x86_64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.dmg
+          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.app.zip ./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
+          mv src-tauri/target/aarch64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_aarch64${{matrix.executable_extension}}
+          mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_aarch64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_aarch64.dmg
+          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_aarch64.app.zip ./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
         shell: bash
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
         if: matrix.os == 'windows-latest'
         run: |
-          mv src-tauri/target/x86_64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi
-          mv src-tauri/target/i686-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86${{matrix.executable_extension}}
-          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.SOURCE_NAME}}_x86.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86.msi
+          mv src-tauri/target/x86_64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.msi
+          mv src-tauri/target/i686-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x86${{matrix.executable_extension}}
+          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_x86.msi ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x86.msi
         shell: bash
       - name: Display structure of build files
         run: |
@@ -248,30 +252,30 @@ jobs:
         
       # files prepared to publish to release
       # platform executable
-      ## ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}${{matrix.executable_extension}} 
+      ## ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}${{matrix.executable_extension}} 
       # linux bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.AppImage 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_amd64.deb 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.AppImage 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.deb 
       # macos bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.dmg 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.app.zip 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.dmg 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_aarch64.app.zip 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.dmg 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.app.zip 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_aarch64 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_aarch64.dmg 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_aarch64.app.zip 
       # windows bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.exe
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x64.msi
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86.exe
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}_x86.msi
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.exe
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.msi
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x86.exe
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x86.msi
       - name: 'Publish binary to release'
         continue-on-error: true
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          file: ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.SOURCE_NAME}}*
+          file: ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}*
           tags: true
           draft: false
           overwrite: true
