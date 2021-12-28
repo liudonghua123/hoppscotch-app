@@ -1,0 +1,123 @@
+
+// // fetch response structure
+// // https://developer.mozilla.org/en-US/docs/Web/API/Response
+// // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
+// {
+//   body: ReadableStream
+//   bodyUsed: false
+//   headers: Headers {}
+//   ok: true
+//   redirected: false
+//   status: 200
+//   statusText: ""
+//   type: "cors"
+//   url: "http://localhost:8080/hello"
+// }
+//
+// // axios response structure
+// // https://github.com/axios/axios#response-schema
+// export interface AxiosResponse<T = any, D = any>  {
+//   data: T;
+//   status: number;
+//   statusText: string;
+//   headers: AxiosResponseHeaders;
+//   config: AxiosRequestConfig<D>;
+//   request?: any;
+// }
+// {
+//   // `data` is the response that was provided by the server
+//   data: {},
+//   // `status` is the HTTP status code from the server response
+//   status: 200,
+//   // `statusText` is the HTTP status message from the server response
+//   statusText: 'OK',
+//   // `headers` the HTTP headers that the server responded with
+//   // All header names are lower cased and can be accessed using the bracket notation.
+//   // Example: `response.headers['content-type']`
+//   headers: {},
+//   // `config` is the config that was provided to `axios` for the request
+//   config: {},
+//   // `request` is the request that generated this response
+//   // It is the last ClientRequest instance in node.js (in redirects)
+//   // and an XMLHttpRequest instance in the browser
+//   request: {}
+// }
+//
+// // window.__TAURI__.http.fetch response structure
+// class Response<T> {
+//   /** The request URL. */
+//   url: string
+//   /** The response status code. */
+//   status: number
+//   /** A boolean indicating whether the response was successful (status in the range 200–299) or not. */
+//   ok: boolean
+//   /** The response headers. */
+//   headers: Record<string, string>
+//   /** The response data. */
+//   data: T
+// }
+declare global {
+  interface Window {
+    __TAURI__?: any
+  }
+}
+console.info(`executing extension strategy`)
+if (window.__TAURI__ && window.__TAURI__.http) {
+  console.info(`injected tauri extension strategy`)
+  window.__POSTWOMAN_EXTENSION_HOOK__ = {
+    sendRequest: async ({
+      url,
+      method,
+      headers,
+      params,
+      data,
+    }: any): Promise<NetworkResponse> => {
+      try {
+        let body = null
+        const contentType: String =
+          headers["content-type"] || headers["Content-Type"] || "text/plain"
+        // https://github.com/tauri-apps/tauri/blob/next/tooling/api/src/http.ts
+        let type = "Bytes"
+        // 1: JSON, 2: Text, 3: Binary
+        let responseType = 2
+        if (contentType.includes("json")) {
+          type = "Json"
+          responseType = 1
+        } else if (contentType.includes("form")) {
+          type = "Form"
+          responseType = 2
+        } else if (contentType.includes("text")) {
+          type = "Text"
+          responseType = 2
+        }
+        if (data) {
+          body = { type, payload: data }
+        }
+        const tauriFetchRes = await window.__TAURI__.http.fetch(url, {
+          method,
+          headers,
+          query: params,
+          body,
+          responseType,
+        })
+        console.info(`tauri fetch response`, tauriFetchRes)
+        return {
+          ...tauriFetchRes,
+          data: new TextEncoder().encode(JSON.stringify(tauriFetchRes.data)),
+          statusText: "ok",
+        }
+      } catch (error) {
+        console.info(`tauri fetch got error: `, error)
+        return {
+          status: 500,
+          headers: {},
+          data: new TextEncoder().encode(`tauri fetch got error: ${error}`),
+          statusText: "",
+          config: {},
+        }
+      }
+    },
+    getVersion: () => ({ major: 0, minor: 22 }),
+    cancelRunningRequest: () => { },
+  }
+}

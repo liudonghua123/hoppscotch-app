@@ -26,6 +26,13 @@ jobs:
           git branch
           git log -n 3
         working-directory: hoppscotch
+      - name: 'Patch ExtensionStrategy.ts'
+        run: |
+          echo "original ExtensionStrategy.ts"
+          cat hoppscotch/packages/hoppscotch-app/helpers/strategies/ExtensionStrategy.ts
+          cat postwoman_extension_hook_patch.txt >> hoppscotch/packages/hoppscotch-app/helpers/strategies/ExtensionStrategy.ts
+          echo "patched ExtensionStrategy.ts"
+          cat hoppscotch/packages/hoppscotch-app/helpers/strategies/ExtensionStrategy.ts
       - name: Branch name
         id: branch_name
         run: |
