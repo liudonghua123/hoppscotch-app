@@ -117,7 +117,7 @@ if (window.__TAURI__ && window.__TAURI__.http) {
         }
       }
     },
-    getVersion: () => ({ major: 0, minor: 22 }),
+    getVersion: () => ({ major: 0, minor: 1, patch: 0 }),
     cancelRunningRequest: () => { },
   }
 }
