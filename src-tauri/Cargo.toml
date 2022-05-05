@@ -6,24 +6,25 @@ authors = ["you"]
 license = ""
 repository = ""
 default-run = "app"
-edition = "2018"
-build = "src/build.rs"
+edition = "2021"
+rust-version = "1.57"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-#tauri-build = { version = "1.0.0-beta.4" }
-tauri-build = { git = "https://github.com/tauri-apps/tauri", branch = "next" }
+tauri-build = { version = "1.0.0-rc.6", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-#tauri = { version = "1.0.0-beta.8", features = ["api-all"] }
-tauri = { git = "https://github.com/tauri-apps/tauri", branch = "next", features = ["api-all"] }
-
-#[patch.crates-io]
-#tao = { git = "https://github.com/tauri-apps/tao", branch = "next" }
+tauri = { version = "1.0.0-rc.7", features = ["api-all", "devtools"] }
+# see https://github.com/tauri-apps/tauri/discussions/3638, https://github.com/tauri-apps/tauri/discussions/3059
+# tauri = { git = "https://github.com/tauri-apps/tauri.git", branch = "dev", features = ["devtools", "dialog-all", "macos-private-api", "path-all", "process-exit", "process-relaunch", "shell-open", "window-all"] }
 
 [features]
+# by default Tauri runs in production mode
+# when `tauri dev` runs it is executed with `cargo run --no-default-features` if `devPath` is an URL
 default = [ "custom-protocol" ]
+# this feature is used used for production builds where `devPath` points to the filesystem
+# DO NOT remove this
 custom-protocol = [ "tauri/custom-protocol" ]

@@ -3,10 +3,10 @@
   "scripts": {
     "tauri": "tauri"
   },
-  "devDependencies": {
-    "@tauri-apps/cli": "^1.0.0-beta.10"
-  },
   "dependencies": {
-    "@tauri-apps/api": "^1.0.0-beta.8"
+    "@tauri-apps/api": "^1.0.0-rc.4"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^1.0.0-rc.9"
   }
 }
