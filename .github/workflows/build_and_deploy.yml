@@ -135,24 +135,28 @@ jobs:
           # https://askubuntu.com/questions/1252062/how-to-install-libncurses-so-5-in-ubuntu-20-04
           # https://askubuntu.com/questions/522372/installing-32-bit-libraries-on-ubuntu-14-04-lts-64-bit
           # sudo dpkg --add-architecture i386
-          sudo apt update
-          sudo add-apt-repository universe
-          sudo dpkg --add-architecture i386 
-          sudo apt update
-          sudo apt upgrade
-          sudo apt install -y \
-            libwebkit2gtk-4.0-dev \
-            build-essential \
-            curl \
-            wget \
-            libssl-dev \
-            libssl-dev:i386 \
-            libgtk-3-dev \
-            patchelf \
-            librsvg2-dev \
-            libappindicator3-dev \
-            gcc-multilib \
-            g++-multilib
+          # sudo apt update
+          # sudo add-apt-repository universe
+          # sudo dpkg --add-architecture i386 
+          # sudo apt update
+          # sudo apt upgrade
+          # sudo apt install -y \
+          #   libwebkit2gtk-4.0-dev \
+          #   build-essential \
+          #   curl \
+          #   wget \
+          #   libssl-dev \
+          #   libssl-dev:i386 \
+          #   libgtk-3-dev \
+          #   patchelf \
+          #   librsvg2-dev \
+          #   libappindicator3-dev \
+          #   gcc-multilib \
+          #   g++-multilib
+          # use cross to build, so the dependencies are not required!
+          # check docker
+          docker -v
+          echo 'ok'
       - name: 'Setup for macos'
         if: matrix.os == 'macos-latest'
         run: |
@@ -169,12 +173,17 @@ jobs:
           echo "build native binarys..."
           rustup target add x86_64-unknown-linux-gnu
           rustup target add i686-unknown-linux-gnu
+          # install cross, use cross to build linux binarys
+          cargo install cross
+          # customization tauri.conf.json, runner: cross and distDir: dist
+          mv src-tauri/tauri.conf-linux.json src-tauri/tauri.conf.json
+          cat src-tauri/tauri.conf.json
+          cp -r dist src-tauri/dist
+          ls -l src-tauri/dist
           yarn
           yarn tauri info
           yarn tauri build -t x86_64-unknown-linux-gnu
-          export OPENSSL_LIB_DIR=/usr/lib/i386-linux-gnu/
-          export OPENSSL_INCLUDE_DIR=/usr/include/openssl/
-          yarn tauri build -t i686-unknown-linux-gnu || true
+          yarn tauri build -t i686-unknown-linux-gnu
           echo "build native binarys finished"
       - name: Build Native binarys on macos
         if: matrix.os == 'macos-latest'
@@ -235,9 +244,14 @@ jobs:
         continue-on-error: true
         if: matrix.os == 'ubuntu-latest'
         run: |
+          # for 64-bit binary
           mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64${{matrix.executable_extension}}
           mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.AppImage
           mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.deb
+          # for 32-bit binary
+          mv src-tauri/target/i686-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_i386${{matrix.executable_extension}}
+          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_i386.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_i386.AppImage
+          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{steps.branch_name.outputs.PROJECT_VERSION}}_i386.deb ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_i386.deb
         shell: bash
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
@@ -271,6 +285,9 @@ jobs:
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.AppImage 
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64.deb 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_i386
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_i386.AppImage 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_i386.deb 
       # macos bundles
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64 
       # ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_x64.dmg 
