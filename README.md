@@ -79,7 +79,7 @@ This is hoppscotch desktop app, running in an [Tauri](https://tauri.studio/) app
       </a> |
       <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_amd64.deb">
         💿 DEB bundle
-      </a>
+      </a><br />
       <span>32-bit</span>
       <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_i386">
         📦 Executable
