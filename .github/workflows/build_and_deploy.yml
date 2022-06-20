@@ -13,7 +13,7 @@ env:
 jobs:
   build-depoly-files:
     name: 'Build depoly files'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v2
@@ -81,9 +81,9 @@ jobs:
     if: contains(github.ref, 'tags')
     strategy:
       matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        os: ['ubuntu-22.04', 'macos-latest', 'windows-latest']
         include:
-          - os: 'ubuntu-latest'
+          - os: 'ubuntu-22.04'
             label: 'linux'
             executable_extension: ''
           - os: 'macos-latest'
@@ -129,33 +129,42 @@ jobs:
           rustc --version
           cargo --version
       - name: 'Setup for linux'
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           # https://ubuntu.com/blog/statement-on-32-bit-i386-packages-for-ubuntu-19-10-and-20-04-lts
           # https://askubuntu.com/questions/1252062/how-to-install-libncurses-so-5-in-ubuntu-20-04
           # https://askubuntu.com/questions/522372/installing-32-bit-libraries-on-ubuntu-14-04-lts-64-bit
-          # sudo dpkg --add-architecture i386
-          # sudo apt update
-          # sudo add-apt-repository universe
-          # sudo dpkg --add-architecture i386 
-          # sudo apt update
-          # sudo apt upgrade
-          # sudo apt install -y \
-          #   libwebkit2gtk-4.0-dev \
-          #   build-essential \
-          #   curl \
-          #   wget \
-          #   libssl-dev \
-          #   libssl-dev:i386 \
-          #   libgtk-3-dev \
-          #   patchelf \
-          #   librsvg2-dev \
-          #   libappindicator3-dev \
-          #   gcc-multilib \
-          #   g++-multilib
+          sudo dpkg --add-architecture i386
+          sudo apt update
+          sudo add-apt-repository universe
+          sudo dpkg --add-architecture i386 
+          sudo apt update
+          sudo apt upgrade
+          # install both 32-bit and 64-bit prerequisites of tauri
+          # libayatana-appindicator3-dev is the successor of libappindicator3-dev and 64-bit only
+          # https://tauri.studio/v1/guides/getting-started/prerequisites/
+          sudo apt install -y \
+            libwebkit2gtk-4.0-dev \
+            libwebkit2gtk-4.0-dev:i386 \
+            build-essential \
+            curl \
+            wget \
+            libssl-dev \
+            libssl-dev:i386 \
+            libgtk-3-dev \
+            libgtk-3-dev:i386 \
+            patchelf \
+            librsvg2-dev \
+            librsvg2-dev:i386 \
+            libayatana-appindicator3-dev \
+            gcc-multilib \
+            g++-multilib
           # use cross to build, so the dependencies are not required!
-          # check docker
-          docker -v
+          # # check docker
+          # docker -v
+          # docker run -t --rm liudonghua123/cross:x86_64-unknown-linux-gnu-tauri ls -l /lib/x86_64-linux-gnu/
+          # docker run -t --rm liudonghua123/cross:x86_64-unknown-linux-gnu-tauri pkg-config --list-all
+          # docker run -t --rm liudonghua123/cross:x86_64-unknown-linux-gnu-tauri pkg-config --libs webkit2gtk-4.0
           echo 'ok'
       - name: 'Setup for macos'
         if: matrix.os == 'macos-latest'
@@ -168,22 +177,29 @@ jobs:
           # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md#visual-studio-enterprise-2019
           echo 'ok'
       - name: Build Native binarys on ubuntu
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           echo "build native binarys..."
           rustup target add x86_64-unknown-linux-gnu
           rustup target add i686-unknown-linux-gnu
           # install cross, use cross to build linux binarys
-          cargo install cross
-          # customization tauri.conf.json, runner: cross and distDir: dist
-          mv src-tauri/tauri.conf-linux.json src-tauri/tauri.conf.json
-          cat src-tauri/tauri.conf.json
-          cp -r dist src-tauri/dist
-          ls -l src-tauri/dist
+          # cargo install cross
+          # # customization tauri.conf.json, runner: cross and distDir: dist
+          # mv src-tauri/tauri.conf-linux.json src-tauri/tauri.conf.json
+          # cat src-tauri/tauri.conf.json
+          # cp -r dist src-tauri/dist
+          # ls -l src-tauri/dist
           yarn
           yarn tauri info
-          yarn tauri build -t x86_64-unknown-linux-gnu -v
-          yarn tauri build -t i686-unknown-linux-gnu -v
+          yarn tauri build -t x86_64-unknown-linux-gnu -v || true
+          # check ERROR: Could not find dependency: libwebkit2gtk-4.0.so.37 
+          # docker run -t --rm -v `pwd`/src-tauri:/src-tauri liudonghua123/cross:x86_64-unknown-linux-gnu-tauri ls -l src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app.AppDir/usr/bin/hoppscotch-app
+          # docker run -t --rm -v `pwd`/src-tauri:/src-tauri liudonghua123/cross:x86_64-unknown-linux-gnu-tauri file src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app.AppDir/usr/bin/hoppscotch-app
+          # docker run -t --rm -v `pwd`/src-tauri:/src-tauri liudonghua123/cross:x86_64-unknown-linux-gnu-tauri ldd src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app.AppDir/usr/bin/hoppscotch-app
+          # (cd src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage && OUTPUT=hoppscotch-app_2.1.0_amd64.AppImage ./linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir hoppscotch-app.AppDir --plugin gtk --output appimage -v0 || true)
+          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH
+          export PKG_CONFIG_SYSROOT_DIR=/
+          yarn tauri build -t i686-unknown-linux-gnu -v || true
           echo "build native binarys finished"
       - name: Build Native binarys on macos
         if: matrix.os == 'macos-latest'
@@ -242,7 +258,7 @@ jobs:
       # src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/hoppscotch-app_2.1.0_x64.msi
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
-        if: matrix.os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-22.04'
         run: |
           # for 64-bit binary
           mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{steps.branch_name.outputs.PROJECT_VERSION}}_amd64${{matrix.executable_extension}}
