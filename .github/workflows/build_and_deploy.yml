@@ -47,6 +47,9 @@ jobs:
         with:
           node-version: 16.x
           cache: 'npm'
+      - name: 'Install the root tauri dependences'
+        run: |
+          yarn install
       - name: 'Install pnpm and dependencies '
         run: |
           npm install -g pnpm
