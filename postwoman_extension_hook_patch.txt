@@ -1,4 +1,5 @@
 
+import { Body, ResponseType } from "@tauri-apps/api/http"
 // // fetch response structure
 // // https://developer.mozilla.org/en-US/docs/Web/API/Response
 // // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -77,23 +78,17 @@ if (window.__TAURI__ && window.__TAURI__.http) {
         const contentType: String =
           headers["content-type"] || headers["Content-Type"] || "text/plain"
         // https://github.com/tauri-apps/tauri/blob/next/tooling/api/src/http.ts
-        let type = "Bytes"
         // 1: JSON, 2: Text, 3: Binary
-        let responseType = 2
+        let responseType = ResponseType.Text
         if (contentType.includes("json")) {
-          type = "Json"
-          data = JSON.parse(data)
-          responseType = 1
+          body = Body.json(JSON.parse(data))
+          responseType = ResponseType.JSON
         } else if (contentType.includes("form")) {
-          type = "Form"
-          data = JSON.parse(data)
-          responseType = 2
+          body = Body.form(JSON.parse(data))
+          responseType = ResponseType.Text
         } else if (contentType.includes("text")) {
-          type = "Text"
-          responseType = 2
-        }
-        if (data) {
-          body = { type, payload: data }
+          body = Body.text(data)
+          responseType = ResponseType.Text
         }
         const tauriFetchRes = await window.__TAURI__.http.fetch(url, {
           method,
