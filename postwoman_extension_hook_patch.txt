@@ -82,9 +82,11 @@ if (window.__TAURI__ && window.__TAURI__.http) {
         let responseType = 2
         if (contentType.includes("json")) {
           type = "Json"
+          data = JSON.parse(data)
           responseType = 1
         } else if (contentType.includes("form")) {
           type = "Form"
+          data = JSON.parse(data)
           responseType = 2
         } else if (contentType.includes("text")) {
           type = "Text"
