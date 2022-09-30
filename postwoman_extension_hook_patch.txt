@@ -74,21 +74,27 @@ if (window.__TAURI__ && window.__TAURI__.http) {
       data,
     }: any): Promise<NetworkResponse> => {
       try {
-        let body = null
-        const contentType: String =
-          headers["content-type"] || headers["Content-Type"] || "text/plain"
         // https://github.com/tauri-apps/tauri/blob/next/tooling/api/src/http.ts
         // 1: JSON, 2: Text, 3: Binary
-        let responseType = ResponseType.Text
+        // set the default body to null, responseType to binary
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+        let body = null
+        let responseType = ResponseType.Binary
+        const contentType: String =
+          headers["content-type"] || headers["Content-Type"] || "text/plain"
+        // set body if data is not null
         if (contentType.includes("json")) {
-          body = Body.json(JSON.parse(data))
           responseType = ResponseType.JSON
+          data && (body = Body.json(JSON.parse(data)))
         } else if (contentType.includes("form")) {
-          body = Body.form(JSON.parse(data))
           responseType = ResponseType.Text
+          data && (body = Body.form(JSON.parse(data)))
         } else if (contentType.includes("text")) {
-          body = Body.text(data)
           responseType = ResponseType.Text
+          data && (body = Body.text(data))
+        } else {
+          responseType = ResponseType.Binary
+          data && (body = Body.bytes(data))
         }
         const tauriFetchRes = await window.__TAURI__.http.fetch(url, {
           method,
@@ -98,9 +104,10 @@ if (window.__TAURI__ && window.__TAURI__.http) {
           responseType,
         })
         console.info(`tauri fetch response`, tauriFetchRes)
+        const result = typeof tauriFetchRes.data === 'object' ? JSON.stringify(tauriFetchRes.data): tauriFetchRes.data
         return {
           ...tauriFetchRes,
-          data: new TextEncoder().encode(JSON.stringify(tauriFetchRes.data)),
+          data: new TextEncoder().encode(result),
           statusText: "ok",
         }
       } catch (error) {
