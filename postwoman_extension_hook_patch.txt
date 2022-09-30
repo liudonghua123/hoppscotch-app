@@ -1,5 +1,7 @@
 
-import { Body, ResponseType } from "@tauri-apps/api/http"
+// eslint-disable-next-line import/first, import/order
+import { fetch, Body, ResponseType } from "@tauri-apps/api/http"
+
 // // fetch response structure
 // // https://developer.mozilla.org/en-US/docs/Web/API/Response
 // // https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch
@@ -78,7 +80,7 @@ if (window.__TAURI__ && window.__TAURI__.http) {
         // 1: JSON, 2: Text, 3: Binary
         // set the default body to null, responseType to binary
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
-        let body = null
+        let body
         let responseType = ResponseType.Binary
         const contentType: String =
           headers["content-type"] || headers["Content-Type"] || "text/plain"
@@ -96,7 +98,7 @@ if (window.__TAURI__ && window.__TAURI__.http) {
           responseType = ResponseType.Binary
           data && (body = Body.bytes(data))
         }
-        const tauriFetchRes = await window.__TAURI__.http.fetch(url, {
+        const tauriFetchRes = await fetch<string | object | ArrayBuffer>(url, {
           method,
           headers,
           query: params,
@@ -104,11 +106,15 @@ if (window.__TAURI__ && window.__TAURI__.http) {
           responseType,
         })
         console.info(`tauri fetch response`, tauriFetchRes)
-        const result = typeof tauriFetchRes.data === 'object' ? JSON.stringify(tauriFetchRes.data): tauriFetchRes.data
+        const result =
+          typeof tauriFetchRes.data === "object"
+            ? JSON.stringify(tauriFetchRes.data)
+            : tauriFetchRes.data
         return {
           ...tauriFetchRes,
           data: new TextEncoder().encode(result),
           statusText: "ok",
+          config: {},
         }
       } catch (error) {
         console.info(`tauri fetch got error: `, error)
@@ -122,6 +128,6 @@ if (window.__TAURI__ && window.__TAURI__.http) {
       }
     },
     getVersion: () => ({ major: 0, minor: 1, patch: 0 }),
-    cancelRunningRequest: () => { },
+    cancelRunningRequest: () => {},
   }
 }
