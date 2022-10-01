@@ -203,6 +203,9 @@ jobs:
           echo "build native binarys..."
           rustup target add x86_64-pc-windows-msvc
           rustup target add i686-pc-windows-msvc
+          # if you use cmd shell, you should use call to execute yarn/mvn commands
+          # if you pass some arguments contains quotes in powershell, you need to escape it!
+          # see https://adamtheautomator.com/powershell-escape-double-quotes/, use '"string"' or "`"string`""
           yarn
           yarn tauri info
           yarn tauri build -t x86_64-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
