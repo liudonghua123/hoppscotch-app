@@ -29,10 +29,10 @@ jobs:
       - name: 'Patch ExtensionStrategy.ts'
         run: |
           echo "original ExtensionStrategy.ts"
-          cat hoppscotch/packages/hoppscotch-app/helpers/strategies/ExtensionStrategy.ts
-          cat postwoman_extension_hook_patch.txt >> hoppscotch/packages/hoppscotch-app/helpers/strategies/ExtensionStrategy.ts
+          cat hoppscotch/packages/hoppscotch-app/src/helpers/strategies/ExtensionStrategy.ts
+          cat postwoman_extension_hook_patch.txt >> hoppscotch/packages/hoppscotch-app/src/helpers/strategies/ExtensionStrategy.ts
           echo "patched ExtensionStrategy.ts"
-          cat hoppscotch/packages/hoppscotch-app/helpers/strategies/ExtensionStrategy.ts
+          cat hoppscotch/packages/hoppscotch-app/src/helpers/strategies/ExtensionStrategy.ts
       - name: Use Node.js 16.x
         uses: actions/setup-node@v2
         with:

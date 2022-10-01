@@ -1,5 +1,4 @@
 
-// eslint-disable-next-line import/first, import/order
 import { fetch, Body, ResponseType } from "@tauri-apps/api/http"
 
 // // fetch response structure
@@ -82,7 +81,7 @@ if (window.__TAURI__ && window.__TAURI__.http) {
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
         let body
         let responseType = ResponseType.Binary
-        const contentType: String =
+        const contentType: string =
           headers["content-type"] || headers["Content-Type"] || "text/plain"
         // set body if data is not null
         if (contentType.includes("json")) {
@@ -128,6 +127,5 @@ if (window.__TAURI__ && window.__TAURI__.http) {
       }
     },
     getVersion: () => ({ major: 0, minor: 1, patch: 0 }),
-    cancelRunningRequest: () => {},
   }
 }
