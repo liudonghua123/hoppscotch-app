@@ -176,7 +176,7 @@ jobs:
           # ls -l src-tauri/dist
           yarn
           yarn tauri info
-          yarn tauri build -t x86_64-unknown-linux-gnu -v || true
+          yarn tauri build -t x86_64-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
           # check ERROR: Could not find dependency: libwebkit2gtk-4.0.so.37 
           # docker run -t --rm -v `pwd`/src-tauri:/src-tauri liudonghua123/cross:x86_64-unknown-linux-gnu-tauri ls -l src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app.AppDir/usr/bin/hoppscotch-app
           # docker run -t --rm -v `pwd`/src-tauri:/src-tauri liudonghua123/cross:x86_64-unknown-linux-gnu-tauri file src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app.AppDir/usr/bin/hoppscotch-app
@@ -184,7 +184,7 @@ jobs:
           # (cd src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage && OUTPUT=hoppscotch-app_2.1.0_amd64.AppImage ./linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir hoppscotch-app.AppDir --plugin gtk --output appimage -v0 || true)
           export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH
           export PKG_CONFIG_SYSROOT_DIR=/
-          yarn tauri build -t i686-unknown-linux-gnu -v || true
+          yarn tauri build -t i686-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
           echo "build native binarys finished"
       - name: Build Native binarys on macos
         if: matrix.os == 'macos-latest'
@@ -194,8 +194,8 @@ jobs:
           rustup target add aarch64-apple-darwin
           yarn
           yarn tauri info
-          yarn tauri build -t x86_64-apple-darwin
-          yarn tauri build -t aarch64-apple-darwin
+          yarn tauri build -t x86_64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
+          yarn tauri build -t aarch64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
           echo "build native binarys finished"
       - name: Build Native binarys on windows
         if: matrix.os == 'windows-latest'
@@ -205,10 +205,12 @@ jobs:
           rustup target add i686-pc-windows-msvc
           yarn
           yarn tauri info
-          yarn tauri build -t x86_64-pc-windows-msvc
-          yarn tauri build -t i686-pc-windows-msvc || true
+          yarn tauri build -t x86_64-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
+          yarn tauri build -t i686-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
           echo "build native binarys finished"
+        shell: bash
       - name: Display structure of build files
+        continue-on-error: true
         run: |
           ls -lR src-tauri/target/
         shell: bash
