@@ -1,5 +1,4 @@
-
-import { fetch, Body, ResponseType } from "@tauri-apps/api/http"
+import { fetch, Body, ResponseType, Part, FilePart } from "@tauri-apps/api/http"
 
 // // fetch response structure
 // // https://developer.mozilla.org/en-US/docs/Web/API/Response
@@ -60,7 +59,8 @@ import { fetch, Body, ResponseType } from "@tauri-apps/api/http"
 // }
 declare global {
   interface Window {
-    __TAURI__?: any
+    __TAURI__?: any,
+    __POSTWOMAN_EXTENSION_HOOK__?: any
   }
 }
 console.info(`executing extension strategy`)
@@ -89,7 +89,9 @@ if (window.__TAURI__ && window.__TAURI__.http) {
           data && (body = Body.json(JSON.parse(data)))
         } else if (contentType.includes("form")) {
           responseType = ResponseType.Text
-          data && (body = Body.form(JSON.parse(data)))
+          // https://github.com/tauri-apps/tauri/blob/dev/tooling/api/src/http.ts#L128
+          // https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsArrayBuffer
+          data && (body = Body.form(await normalizeFormData(data)))
         } else if (contentType.includes("text")) {
           responseType = ResponseType.Text
           data && (body = Body.text(data))
@@ -128,4 +130,36 @@ if (window.__TAURI__ && window.__TAURI__.http) {
     },
     getVersion: () => ({ major: 0, minor: 1, patch: 0 }),
   }
+}
+
+async function readFile(file: File): Promise<[Uint8Array, string, string]> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () =>
+      resolve([
+        new Uint8Array(reader.result as ArrayBuffer),
+        file.type,
+        file.name,
+      ])
+    reader.onerror = reject
+    reader.readAsArrayBuffer(file)
+  })
+}
+
+async function normalizeFormData(
+  data: any
+): Promise<Record<string, string | Part>> {
+  // https://melvingeorge.me/blog/convert-html-form-tag-input-values-to-object-javascript
+  const formDataObject = Object.fromEntries(data.entries())
+  const normalizedFormData: Record<string, string | Part> = {}
+  for (const [key, value] of Object.entries(formDataObject)) {
+    if (value instanceof File) {
+      const [file, mime, fileName] = await readFile(value)
+      const filePart: FilePart<Uint8Array> = { file, mime, fileName }
+      normalizedFormData[key] = filePart
+    } else {
+      normalizedFormData[key] = value
+    }
+  }
+  return normalizedFormData
 }
