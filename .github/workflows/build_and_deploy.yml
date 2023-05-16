@@ -124,10 +124,11 @@ jobs:
           sudo add-apt-repository universe
           sudo dpkg --add-architecture i386 
           sudo apt update
-          sudo apt upgrade
+          # sudo apt upgrade
           # install both 32-bit and 64-bit prerequisites of tauri
           # libayatana-appindicator3-dev is the successor of libappindicator3-dev and 64-bit only
           # https://tauri.studio/v1/guides/getting-started/prerequisites/
+          echo install dependences ...
           sudo apt install -y \
             libwebkit2gtk-4.0-dev \
             libwebkit2gtk-4.0-dev:i386 \
