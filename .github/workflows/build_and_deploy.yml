@@ -116,21 +116,17 @@ jobs:
           # sudo add-apt-repository universe
           sudo dpkg --add-architecture i386 
           sudo apt update
-          # sudo apt upgrade
           # install both 32-bit and 64-bit prerequisites of tauri
           # libayatana-appindicator3-dev is the successor of libappindicator3-dev and 64-bit only
           # https://tauri.app/v1/guides/getting-started/prerequisites/#setting-up-linux
           # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
+          echo FIX INSTALL FAILED ON GITHUB UBUNTU 22.04 RUNNER
+          sudo apt install -y libatomic1:i386 gcc-11-base:i386 libgcc-s1:i386 libstdc++6:i386 libgdk-pixbuf-2.0-dev:i386 libgdk-pixbuf2.0-dev:i386
           echo install tools for 32-bit support ...
-          sudo dpkg --add-architecture i386 
-          sudo apt update
-          # sudo apt upgrade
           sudo apt install -y --allow-downgrades \
             gcc-multilib \
             g++-multilib
           echo install 32-bit dependences ...
-          sudo apt update
-          # sudo apt upgrade
           sudo apt install -y --allow-downgrades \
             libwebkit2gtk-4.0-dev:i386 \
             libssl-dev:i386 \
