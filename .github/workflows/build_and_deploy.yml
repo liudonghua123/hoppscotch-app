@@ -121,7 +121,7 @@ jobs:
           # https://tauri.app/v1/guides/getting-started/prerequisites/#setting-up-linux
           # https://github.com/actions/runner-images/blob/main/images/linux/Ubuntu2204-Readme.md
           echo FIX INSTALL FAILED ON GITHUB UBUNTU 22.04 RUNNER
-          sudo apt install -y libatomic1:i386 gcc-11-base:i386 libgcc-s1:i386 libstdc++6:i386 libgdk-pixbuf-2.0-dev:i386 libgdk-pixbuf2.0-dev:i386
+          sudo apt install -y libgcc-s1:i386 libstdc++6:i386 libgdk-pixbuf-2.0-dev:i386 libgdk-pixbuf2.0-dev:i386 libatomic1:i386
           echo install tools for 32-bit support ...
           sudo apt install -y --allow-downgrades \
             gcc-multilib \
