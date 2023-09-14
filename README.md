@@ -15,17 +15,17 @@ This is hoppscotch desktop app, running in an [Tauri](https://tauri.studio/) app
     </td>
     <td>
       <span>64-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-2.2.1_x64.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-23.4.8_x64.exe">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-2.2.1_x64.msi">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-23.4.8_x64.msi">
         💿 MSI Installer
       </a><br />
       <span>32-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-2.2.1_x86.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-23.4.8_x86.exe">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-2.2.1_x86.msi">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-23.4.8_x86.msi">
         💿 MSI Installer
       </a><br />
       <span>
@@ -40,23 +40,23 @@ This is hoppscotch desktop app, running in an [Tauri](https://tauri.studio/) app
     </td>
     <td>
       <span>Intel Processor</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-2.2.1_x64">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-23.4.8_x64">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-2.2.1_x64.dmg">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-23.4.8_x64.dmg">
         💿 DMG bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-2.2.1_x64.app.zip">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-23.4.8_x64.app.zip">
         💿 APP bundle
       </a><br />
       <span>Apple M1 Processor</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-2.2.1_aarch64">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-23.4.8_aarch64">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-2.2.1_aarch64.dmg">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-23.4.8_aarch64.dmg">
         💿 DMG bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-2.2.1_aarch64.app.zip">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-23.4.8_aarch64.app.zip">
         💿 APP bundle
       </a><br />
       <span>
@@ -71,23 +71,23 @@ This is hoppscotch desktop app, running in an [Tauri](https://tauri.studio/) app
     </td>
     <td>
       <span>64-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_amd64">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-23.4.8_amd64">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_amd64.AppImage">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-23.4.8_amd64.AppImage">
         💿 AppImage bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_amd64.deb">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-23.4.8_amd64.deb">
         💿 DEB bundle
       </a><br />
       <span>32-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_i386">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-23.4.8_i386">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_i386.AppImage">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-23.4.8_i386.AppImage">
         💿 AppImage bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-2.2.1_i386.deb">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-23.4.8_i386.deb">
         💿 DEB bundle
       </a>
     </td>
