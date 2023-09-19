@@ -1,24 +1,44 @@
-name: CI_CD
+name: build_and_deploy
 on:
-  push:
-    tags:
-      - "*"
-    branches:
-      - 'main'
-      - 'master'
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'The branch to build'
+        required: true
+        default: 'main'
+      tag_short_version:
+        description: 'The short version of hoppscotch upstream, eg: use 23.8.1 instead of 2023.8.1'
+        required: true
+        default: '23.8.1'
 
 env:
   APP_NAME: hoppscotch-app
 
 jobs:
   build-depoly-files:
-    name: Build depoly files for ${{ github.ref_name }}
+    name: Build depoly files for ${{ github.event.inputs.tag_short_version }}
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v2
         with:
           submodules: true
+      - name: 'Checkout specified tag version of hoppscotch'
+        run: |
+          git config --global pull.rebase false
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          cd hoppscotch
+          git status
+          git remote -v
+          git fetch
+          git checkout 20${{ github.event.inputs.tag_short_version }}
+          cd ..
+          git add hoppscotch
+          git commit -m "update hoppscotch to 20${{ github.event.inputs.tag_short_version }}"
+          git tag ${{ github.event.inputs.tag_short_version }}
+          git push
+          git push --tag
       - name: 'Patch ExtensionStrategy.ts'
         run: |
           echo "original ExtensionStrategy.ts"
@@ -46,18 +66,19 @@ jobs:
         working-directory: hoppscotch
       - name: Prepare build files achive
         run: |
-          7z a -tzip ${{env.APP_NAME}}-${{ github.ref_name }}.zip -r ./hoppscotch/packages/hoppscotch-selfhost-web/dist/*
+          7z a -tzip ${{env.APP_NAME}}-${{ github.event.inputs.tag_short_version }}.zip -r ./hoppscotch/packages/hoppscotch-selfhost-web/dist/*
         shell: bash
       - uses: actions/upload-artifact@v2
         with:
           name: hoppscotch-dist
-          path: ${{env.APP_NAME}}-${{ github.ref_name }}.zip
+          path: ${{env.APP_NAME}}-${{ github.event.inputs.tag_short_version }}.zip
       - name: 'Publish build files achive to release'
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          file: ${{env.APP_NAME}}-${{ github.ref_name }}.zip
+          tag_name: ${{ github.event.inputs.tag_short_version }}
+          file: ${{env.APP_NAME}}-${{ github.event.inputs.tag_short_version }}.zip
           tags: true
           draft: false
           overwrite: true
@@ -65,7 +86,6 @@ jobs:
   build-native-executable:
     name: 'Build native executable'
     needs: [build-depoly-files]
-    if: contains(github.ref, 'tags')
     strategy:
       fail-fast: false
       matrix:
@@ -92,7 +112,7 @@ jobs:
       - name: Extract hoppscotch-dist
         run: |
           rm -rf dist
-          unzip ${{env.APP_NAME}}-${{ github.ref_name }}.zip -d dist
+          unzip ${{env.APP_NAME}}-${{ github.event.inputs.tag_short_version }}.zip -d dist
         shell: bash
       - name: Display structure of downloaded files
         run: ls -l . dist
@@ -171,7 +191,7 @@ jobs:
           # ls -l src-tauri/dist
           yarn
           yarn tauri info
-          yarn tauri build -t x86_64-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
+          yarn tauri build -t x86_64-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_short_version }}\"}}"
           # check ERROR: Could not find dependency: libwebkit2gtk-4.0.so.37 
           # docker run -t --rm -v `pwd`/src-tauri:/src-tauri liudonghua123/cross:x86_64-unknown-linux-gnu-tauri ls -l src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app.AppDir/usr/bin/hoppscotch-app
           # docker run -t --rm -v `pwd`/src-tauri:/src-tauri liudonghua123/cross:x86_64-unknown-linux-gnu-tauri file src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app.AppDir/usr/bin/hoppscotch-app
@@ -179,7 +199,7 @@ jobs:
           # (cd src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage && OUTPUT=hoppscotch-app_2.1.0_amd64.AppImage ./linuxdeploy-x86_64.AppImage --appimage-extract-and-run --appdir hoppscotch-app.AppDir --plugin gtk --output appimage -v0 || true)
           export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH
           export PKG_CONFIG_SYSROOT_DIR=/
-          yarn tauri build -t i686-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
+          yarn tauri build -t i686-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_short_version }}\"}}"
           echo "build native binarys finished"
       - name: Build Native binarys on macos
         if: matrix.os == 'macos-latest'
@@ -189,8 +209,8 @@ jobs:
           rustup target add aarch64-apple-darwin
           yarn
           yarn tauri info
-          yarn tauri build -t x86_64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
-          yarn tauri build -t aarch64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
+          yarn tauri build -t x86_64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_short_version }}\"}}"
+          yarn tauri build -t aarch64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_short_version }}\"}}"
           echo "build native binarys finished"
       - name: Build Native binarys on windows
         if: matrix.os == 'windows-latest'
@@ -203,8 +223,8 @@ jobs:
           # see https://adamtheautomator.com/powershell-escape-double-quotes/, use '"string"' or "`"string`""
           yarn
           yarn tauri info
-          yarn tauri build -t x86_64-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
-          yarn tauri build -t i686-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.ref_name }}\"}}"
+          yarn tauri build -t x86_64-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_short_version }}\"}}"
+          yarn tauri build -t i686-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_short_version }}\"}}"
           echo "build native binarys finished"
         shell: bash
       - name: Display structure of build files
@@ -246,33 +266,33 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           # for 64-bit binary
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_amd64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{ github.ref_name }}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_amd64.AppImage
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{ github.ref_name }}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_amd64.deb
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64.AppImage
+          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64.deb
           # for 32-bit binary
-          mv src-tauri/target/i686-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_i386${{matrix.executable_extension}}
-          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{ github.ref_name }}_i386.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_i386.AppImage
-          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{ github.ref_name }}_i386.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_i386.deb
+          mv src-tauri/target/i686-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386${{matrix.executable_extension}}
+          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_i386.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386.AppImage
+          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_i386.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386.deb
         shell: bash
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
         if: matrix.os == 'macos-latest'
         run: |
-          mv src-tauri/target/x86_64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{ github.ref_name }}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64.app.zip ./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
-          mv src-tauri/target/aarch64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_aarch64${{matrix.executable_extension}}
-          mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{ github.ref_name }}_aarch64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_aarch64.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_aarch64.app.zip ./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
+          mv src-tauri/target/x86_64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.dmg
+          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.app.zip ./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
+          mv src-tauri/target/aarch64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64${{matrix.executable_extension}}
+          mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_aarch64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64.dmg
+          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64.app.zip ./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
         shell: bash
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
         if: matrix.os == 'windows-latest'
         run: |
-          mv src-tauri/target/x86_64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.ref_name }}_x64_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64.msi
-          mv src-tauri/target/i686-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x86${{matrix.executable_extension}}
-          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.ref_name }}_x86_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x86.msi
+          mv src-tauri/target/x86_64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64${{matrix.executable_extension}}
+          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_x64_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.msi
+          mv src-tauri/target/i686-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86${{matrix.executable_extension}}
+          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_x86_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86.msi
         shell: bash
       - name: Display structure of build files
         run: |
@@ -281,33 +301,34 @@ jobs:
         
       # files prepared to publish to release
       # platform executable
-      ## ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}${{matrix.executable_extension}} 
+      ## ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}${{matrix.executable_extension}} 
       # linux bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_amd64
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_amd64.AppImage 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_amd64.deb 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_i386
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_i386.AppImage 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_i386.deb 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64.AppImage 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64.deb 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386.AppImage 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386.deb 
       # macos bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64.dmg 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64.app.zip 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_aarch64 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_aarch64.dmg 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_aarch64.app.zip 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.dmg 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.app.zip 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64.dmg 
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64.app.zip 
       # windows bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64.exe
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x64.msi
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x86.exe
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}_x86.msi
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.exe
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.msi
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86.exe
+      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86.msi
       - name: 'Publish binary to release'
         continue-on-error: true
         uses: xresloader/upload-to-github-release@v1
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
         with:
-          file: ${{env.APP_NAME}}-${{matrix.label}}-${{ github.ref_name }}*
+          tag_name: ${{ github.event.inputs.tag_short_version }}
+          file: ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}*
           tags: true
           draft: false
           overwrite: true
