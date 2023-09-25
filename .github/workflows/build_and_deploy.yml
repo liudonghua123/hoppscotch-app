@@ -23,7 +23,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           submodules: true
-      - name: 'Checkout specified tag version of hoppscotch'
+      - name: 'Checkout and push specified tag version of hoppscotch'
         run: |
           git config --global pull.rebase false
           git config --global user.name "github-actions[bot]"
@@ -31,8 +31,9 @@ jobs:
           cd hoppscotch
           git status
           git remote -v
-          git fetch
-          git checkout 20${{ github.event.inputs.tag_short_version }}
+          git fetch --all --tags
+          git checkout tags/20${{ github.event.inputs.tag_short_version }}
+          git status
           cd ..
           git add hoppscotch
           git commit -m "update hoppscotch to 20${{ github.event.inputs.tag_short_version }}"
