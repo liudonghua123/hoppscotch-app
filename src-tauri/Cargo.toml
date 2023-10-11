@@ -12,12 +12,12 @@ rust-version = "1.59"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [build-dependencies]
-tauri-build = { version = "1.2.0", features = [] }
+tauri-build = { version = "1.5.0", features = [] }
 
 [dependencies]
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
-tauri = { version = "1.2.0", features = ["api-all", "devtools", "http-multipart"] }
+tauri = { version = "1.5.1", features = ["api-all", "devtools", "http-multipart"] }
 # see https://github.com/tauri-apps/tauri/discussions/3638, https://github.com/tauri-apps/tauri/discussions/3059
 # tauri = { git = "https://github.com/tauri-apps/tauri.git", branch = "dev", features = ["devtools", "dialog-all", "macos-private-api", "path-all", "process-exit", "process-relaunch", "shell-open", "window-all"] }
 
