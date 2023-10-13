@@ -245,23 +245,6 @@ jobs:
       #     7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{steps.environment.outputs.PROJECT_VERSION}}.zip -r ./build/*
       #   shell: bash
 
-      # the directory structure of build files
-      # linux
-      # src-tauri/target/x86_64-unknown-linux-gnu/release/hoppscotch-app
-      # src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/hoppscotch-app_2.1.0_amd64.AppImage
-      # src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/hoppscotch-app_2.1.0_amd64.deb
-      # macos
-      # src-tauri/target/x86_64-apple-darwin/release/hoppscotch-app
-      # src-tauri/target/x86_64-apple-darwin/release/bundle/macos/hoppscotch-app.app
-      # src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/hoppscotch-app_2.1.0_x64.dmg
-      # src-tauri/target/aarch64-apple-darwin/release/hoppscotch-app
-      # src-tauri/target/aarch64-apple-darwin/release/bundle/macos/hoppscotch-app.app
-      # src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/hoppscotch-app_2.1.0_aarch64.dmg
-      # windows
-      # src-tauri/target/x86_64-pc-windows-msvc/release/hoppscotch-app.exe
-      # src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/hoppscotch-app_2.1.0_x64.msi
-      # src-tauri/target/i686-pc-windows-msvc/release/hoppscotch-app.exe
-      # src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/hoppscotch-app_2.1.0_x64.msi
       - name: Prepare release files on ${{matrix.label}}
         continue-on-error: true
         if: matrix.os == 'ubuntu-latest'
@@ -302,28 +285,6 @@ jobs:
           ls -l .
         shell: bash
         
-      # files prepared to publish to release
-      # platform executable
-      ## ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}${{matrix.executable_extension}} 
-      # linux bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64.AppImage 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_amd64.deb 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386.AppImage 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_i386.deb 
-      # macos bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.dmg 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.app.zip 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64.dmg 
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_aarch64.app.zip 
-      # windows bundles
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.exe
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.msi
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86.exe
-      # ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86.msi
       - name: 'Publish binary to release'
         continue-on-error: true
         uses: xresloader/upload-to-github-release@v1
