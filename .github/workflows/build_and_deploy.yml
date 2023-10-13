@@ -292,8 +292,10 @@ jobs:
         run: |
           mv src-tauri/target/x86_64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64${{matrix.executable_extension}}
           mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_x64_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64.msi
+          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_x64-setup.exe ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x64-setup.exe
           mv src-tauri/target/i686-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86${{matrix.executable_extension}}
           mv src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_x86_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86.msi
+          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/nsis/${{env.APP_NAME}}_${{ github.event.inputs.tag_short_version }}_x86-setup.exe ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_short_version }}_x86-setup.exe
         shell: bash
       - name: Display structure of build files
         run: |
