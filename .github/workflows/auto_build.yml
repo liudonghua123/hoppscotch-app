@@ -1,0 +1,109 @@
+name: auto_build
+on:
+  workflow_dispatch: 
+  schedule:
+    - cron: '0 23 * * 2-6'
+
+# https://docs.github.com/zh/actions/using-jobs/assigning-permissions-to-jobs
+permissions: write-all
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_static_files:
+    name: build static files
+    runs-on: ubuntu-latest
+    # https://matthewrich.com/2022/10/13/github-actions-job-output/
+    outputs:
+      tag_updated: ${{ steps.check_tag_updated.outputs.tag_updated }}
+      latest_upstream_tag_name: ${{ steps.check_tag_updated.outputs.latest_upstream_tag_name }}
+      current_tag_name: ${{ steps.check_tag_updated.outputs.current_tag_name }}
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+
+      - name: 'Checkout upstream updates'
+        uses: actions/github-script@v6
+        id: check_tag_updated
+        with:
+          script: |
+            // uncomment the following lines to test in local node env
+            // --------------------
+            // const { Octokit } = require("@octokit/rest");
+            // const core = require('@actions/core');
+            
+            // const github = new Octokit();
+            // const context = github.context;
+            // --------------------          
+
+            function compare_semantic_version(a, b) {
+              const [majorA, minorA, patchA] = a.split('.');
+              const [majorB, minorB, patchB] = b.split('.');
+              if (majorA > majorB) return 1;
+              if (majorA < majorB) return -1;
+              if (minorA > minorB) return 1;
+              if (minorA < minorB) return -1;
+              if (patchA > patchB) return 1;
+            }
+            
+            async function get_latest_tag_name(owner, repo) {
+                let latest_tag_name = '';
+                try {
+                    // see also https://github.com/oprypin/find-latest-tag
+                    // get the latest tag from the latest release
+                    const { data: { tag_name } } = await github.rest.repos.getLatestRelease({ owner, repo });
+                    latest_tag_name = tag_name;
+                } catch (error) {
+                    // fallback to use the tags
+                    const { data: [latest_tag] } = await github.rest.repos.listTags({ owner, repo })
+                    latest_tag_name = latest_tag.name;
+                }
+                console.info(`found ${owner}/${repo} latest_tag_name ${latest_tag_name}`)
+                return latest_tag_name;
+            }
+            
+            async function check_tag_updated(upstream_owner = 'hoppscotch', upstream_repo = 'hoppscotch') {
+                const latest_upstream_tag_name = await get_latest_tag_name(upstream_owner, upstream_repo);
+                // the version of https://github.com/liudonghua123/hoppscotch-app use part of https://github.com/hoppscotch/hoppscotch.
+                // for example, 23.8.2 is corresponding to 2023.8.2
+                let current_tag_name = await get_latest_tag_name(context?.repo.owner || 'liudonghua123', context?.repo.repo || 'hoppscotch-app');
+                current_tag_name = `20${current_tag_name}`
+                const remove_prefix_if_exists = (str, prefix = 'v') => str.startsWith(prefix) ? str.substring(prefix.length) : str;
+                const nomorlized_upstream_tag_name = remove_prefix_if_exists(latest_upstream_tag_name);
+                const tag_updated = (compare_semantic_version(nomorlized_upstream_tag_name, current_tag_name) > 0);
+                return { tag_updated, latest_upstream_tag_name: nomorlized_upstream_tag_name, current_tag_name };
+            }
+            
+            async function main() {
+                const { tag_updated, latest_upstream_tag_name, current_tag_name } = await check_tag_updated();
+                // https://github.com/actions/toolkit/tree/main/packages/core#styling-output
+                core.info(`\u001b[35mtag_updated: ${tag_updated}, latest_upstream_tag_name: ${latest_upstream_tag_name}, current_tag_name: ${current_tag_name}`);
+                // Exporting variables
+                // see also 
+                core.setOutput('tag_updated', tag_updated);
+                core.setOutput('latest_upstream_tag_name', latest_upstream_tag_name);
+                core.setOutput('current_tag_name', current_tag_name);
+                // invoke build action if tag_updated
+                if (!tag_updated) {
+                    core.info('tag not updated, skip trigger build action to run');
+                    return;
+                }
+                // trigger build action to run
+                core.info('trigger build action to run');
+                // TODO: run the build.yml action via action rest api
+                // github.rest.actions.reRunWorkflow({ owner, repo, workflow_id: 'build.yml' })
+            }
+            
+            (async () => { await main(); })();
+
+      # https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+      - name: Triggering workflow of build.yml for tag_updated ${{ steps.check_tag_updated.outputs.tag_updated }}
+        if: steps.check_tag_updated.outputs.tag_updated == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          latest_upstream_tag_name=${{ steps.check_tag_updated.outputs.latest_upstream_tag_name }}
+          echo Triggering workflow of build.yml with tag_version ${latest_upstream_tag_name#20}
+          gh workflow run build.yml -f tag_version=${latest_upstream_tag_name#20}
