@@ -39,8 +39,8 @@ jobs:
             // --------------------          
 
             function compare_semantic_version(a, b) {
-              const [majorA, minorA, patchA] = a.split('.');
-              const [majorB, minorB, patchB] = b.split('.');
+              const [majorA, minorA, patchA] = a.split('.').map(elem=> parseInt(elem));
+              const [majorB, minorB, patchB] = b.split('.').map(elem=> parseInt(elem));
               if (majorA > majorB) return 1;
               if (majorA < majorB) return -1;
               if (minorA > minorB) return 1;
