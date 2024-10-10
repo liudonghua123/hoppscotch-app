@@ -43,12 +43,12 @@ jobs:
           git status
           cd ..
           git add hoppscotch
-          git commit -m "update hoppscotch to 20${{ github.event.inputs.tag_version }}"
+          git commit -m "update hoppscotch to 20${{ github.event.inputs.tag_version }}" || true
           # update version in README.md using sed
           sed -i "s/[0-9]\+\.[0-9]\+\.[0-9]\+/${{ github.event.inputs.tag_version }}/g" README.md
           git add README.md
-          git commit -m "update README.md"
-          git tag ${{ github.event.inputs.tag_version }}
+          git commit -m "update README.md" || true
+          git tag ${{ github.event.inputs.tag_version }} || true
           git push
           git push --tag
       - name: 'Patch ExtensionStrategy.ts'
@@ -84,16 +84,14 @@ jobs:
         with:
           name: hoppscotch-dist
           path: ${{env.APP_NAME}}-${{ github.event.inputs.tag_version }}.zip
-      - name: 'Publish build files achive to release'
-        uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Publish build files achive to release
+        uses: softprops/action-gh-release@v1
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.event.inputs.tag_version }}
-          file: ${{env.APP_NAME}}-${{ github.event.inputs.tag_version }}.zip
-          tags: true
+          files: ${{env.APP_NAME}}-${{ github.event.inputs.tag_version }}.zip
           draft: false
-          overwrite: true
+          prerelease: false
 
   build-native-executable:
     name: 'Build native executable'
@@ -102,16 +100,6 @@ jobs:
       fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        include:
-          - os: 'ubuntu-latest'
-            label: 'linux'
-            executable_extension: ''
-          - os: 'macos-latest'
-            label: 'macos'
-            executable_extension: ''
-          - os: 'windows-latest'
-            label: 'windows'
-            executable_extension: '.exe'
     runs-on: ${{matrix.os}}
     steps:
       - name: 'Checkout'
@@ -132,222 +120,29 @@ jobs:
         with:
           node-version: 18.x
           cache: 'yarn'
-      - name: check toolchain version
-        run: |
-          node --version
-          npm --version
-          yarn --version
-          rustc --version
-          cargo --version
-
-      - name: 'Setup for linux'
-        if: matrix.os == 'ubuntu-latest'
-        run: |-
-          sudo ls -lR /etc/apt/
-          echo -------------
-          # sudo sed 's/mirror+file:\/etc\/apt\/apt-mirrors.txt/[arch-=amd64,i386] http:\/\/ports.ubuntu.com\/ubuntu-ports\//g' /etc/apt/sources.list | sudo tee /etc/apt/sources.list.d/ports.list
-          # echo -------------
-          # sudo sed -i 's/mirror+file:\/etc\/apt\/apt-mirrors.txt/[arch=amd64,i386] http:\/\/archive.ubuntu.com\/ubuntu\//g' /etc/apt/sources.list
-          cat > /tmp/sources.list << EOF
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy main multiverse universe restricted
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy-security main multiverse universe restricted
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy-updates main multiverse universe restricted
-          deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu jammy-backports main multiverse universe restricted
-          
-          deb [arch-=amd64,i386] http://ports.ubuntu.com/ubuntu-ports jammy main multiverse universe restricted
-          deb [arch-=amd64,i386] http://ports.ubuntu.com/ubuntu-ports jammy-security main multiverse universe restricted
-          deb [arch-=amd64,i386] http://ports.ubuntu.com/ubuntu-ports jammy-updates main multiverse universe restricted
-          deb [arch-=amd64,i386] http://ports.ubuntu.com/ubuntu-ports jammy-backports main multiverse universe restricted
-          EOF
-          sudo mv /etc/apt/sources.list /etc/apt/sources.list.default
-          sudo mv /tmp/sources.list /etc/apt/sources.list
-
-          echo -------------
-          echo /etc/apt/sources.list && cat /etc/apt/sources.list
-          echo -------------
-          echo /etc/apt/apt-mirrors.txt && cat /etc/apt/apt-mirrors.txt
-          echo -------------
-          echo /etc/apt/sources.list.d/ports.list && cat /etc/apt/sources.list.d/ports.list || true
-          echo -------------
-
-          sudo dpkg --add-architecture i386 
-          sudo dpkg --add-architecture arm64
-          sudo dpkg --add-architecture armhf
-          sudo apt update
-          
-          sudo apt install -y \
-            gcc-multilib \
-            g++-multilib
-
-          echo -------------
-          echo install dependences ...
-          sudo apt install -y \
-            libwebkit2gtk-4.0-dev \
-            libssl-dev \
-            libgtk-3-dev \
-            librsvg2-dev \
-            libayatana-appindicator3-dev
-
-          echo -------------
-          echo install 32-bit dependences ...
-          # libayatana-appindicator3-dev:i386 is missing, see https://packages.ubuntu.com/focal/libayatana-appindicator3-dev
-          sudo apt install -y \
-            libwebkit2gtk-4.0-dev:i386 \
-            libssl-dev:i386 \
-            libgtk-3-dev:i386 \
-            librsvg2-dev:i386
-          
-          echo -------------
-          echo install arm64 dependences ...
-          sudo apt install -y \
-            gcc-aarch64-linux-gnu \
-            g++-aarch64-linux-gnu \
-            libc6-dev-arm64-cross \
-            patchelf:arm64 \
-            libwebkit2gtk-4.0-dev:arm64 \
-            libssl-dev:arm64 \
-            libgtk-3-dev:arm64 \
-            librsvg2-dev:arm64 \
-            libayatana-appindicator3-dev:arm64
-          
-          echo -------------
-          echo install armhf dependences ...
-          sudo apt install -y \
-            gcc-arm-linux-gnueabihf \
-            g++-arm-linux-gnueabihf \
-            libc6-dev-armhf-cross \
-            patchelf:armhf \
-            libwebkit2gtk-4.0-dev:armhf \
-            libssl-dev:armhf \
-            libgtk-3-dev:armhf \
-            librsvg2-dev:armhf \
-            libayatana-appindicator3-dev:armhf
-          echo 'ok'
-      - name: 'Setup for macos'
-        if: matrix.os == 'macos-latest'
-        run: |
-          echo 'ok'
-      - name: 'Setup for windows'
-        if: matrix.os == 'windows-latest'
-        run: |
-          # choco install visualstudio2019-workload-vctools
-          # https://github.com/actions/virtual-environments/blob/main/images/win/Windows2019-Readme.md#visual-studio-enterprise-2019
-          echo 'ok'
-
-      - name: Build Native binarys on ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          echo "build native binarys..."
-          rustup target add x86_64-unknown-linux-gnu
-          rustup target add i686-unknown-linux-gnu
-          rustup target add aarch64-unknown-linux-gnu
-          rustup target add armv7-unknown-linux-gnueabihf
-          yarn
-          yarn tauri info
-          yarn tauri build -t x86_64-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}"
-          
-          export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig/:$PKG_CONFIG_PATH
-          export PKG_CONFIG_SYSROOT_DIR=/
-          yarn tauri build -t i686-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}"
-          
-          export PKG_CONFIG_SYSROOT_DIR=/usr/aarch64-linux-gnu/
-          yarn tauri build -t aarch64-unknown-linux-gnu -v -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}" -b deb || echo something not works! 
-          
-          export PKG_CONFIG_SYSROOT_DIR=/usr/arm-linux-gnueabihf/
-          yarn tauri build -t armv7-unknown-linux-gnueabihf -v -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}" -b deb || echo something not works! 
-          echo "build native binarys finished"
-      - name: Build Native binarys on macos
-        if: matrix.os == 'macos-latest'
-        run: |
-          echo "build native binarys..."
-          rustup target add x86_64-apple-darwin
-          rustup target add aarch64-apple-darwin
-          yarn
-          yarn tauri info
-          yarn tauri build -t x86_64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}"
-          yarn tauri build -t aarch64-apple-darwin -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}"
-          yarn tauri build -t universal-apple-darwin -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}" || echo something not works! 
-          echo "build native binarys finished"
-      - name: Build Native binarys on windows
-        if: matrix.os == 'windows-latest'
-        run: |
-          echo "build native binarys..."
-          rustup target add x86_64-pc-windows-msvc
-          rustup target add i686-pc-windows-msvc
-          rustup target add aarch64-pc-windows-msvc
-          yarn
-          yarn tauri info
-          yarn tauri build -t x86_64-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}"
-          yarn tauri build -t i686-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}"
-          yarn tauri build -t aarch64-pc-windows-msvc -c "{\"package\":{\"version\":\"${{ github.event.inputs.tag_version }}\"}}" -b nsis || echo something not works! 
-          echo "build native binarys finished"
-      - name: Display structure of build files
-        continue-on-error: true
-        run: |
-          ls -lR src-tauri/target/
-
-      - name: Prepare release files on ${{matrix.label}}
-        continue-on-error: true
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          # for 64-bit binary
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_amd64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_amd64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_amd64.AppImage
-          mv src-tauri/target/x86_64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_amd64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_amd64.deb
-          # for 32-bit binary
-          mv src-tauri/target/i686-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_i386${{matrix.executable_extension}}
-          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_i386.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_i386.AppImage
-          mv src-tauri/target/i686-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_i386.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_i386.deb
-          
-          # for arm64 binary
-          mv src-tauri/target/aarch64-unknown-linux-gnu/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_arm64${{matrix.executable_extension}} || true
-          # mv src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/appimage/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_arm64.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_arm64.AppImage || true
-          mv src-tauri/target/aarch64-unknown-linux-gnu/release/bundle/deb/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_arm64.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_arm64.deb || true
-          # for armhf binary
-          mv src-tauri/target/armv7-unknown-linux-gnueabihf/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_armhf${{matrix.executable_extension}} || true
-          # mv src-tauri/target/armv7-unknown-linux-gnueabihf/release/bundle/appimage/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_armhf.AppImage ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_armhf.AppImage || true
-          mv src-tauri/target/armv7-unknown-linux-gnueabihf/release/bundle/deb/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_armhf.deb ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_armhf.deb || true
-      - name: Prepare release files on ${{matrix.label}}
-        continue-on-error: true
-        if: matrix.os == 'macos-latest'
-        run: |
-          mv src-tauri/target/x86_64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_x64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x64.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x64.app.zip ./src-tauri/target/x86_64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
-          
-          mv src-tauri/target/aarch64-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_aarch64${{matrix.executable_extension}}
-          mv src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_aarch64.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_aarch64.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_aarch64.app.zip ./src-tauri/target/aarch64-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
-          
-          mv src-tauri/target/universal-apple-darwin/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_universal${{matrix.executable_extension}}
-          mv src-tauri/target/universal-apple-darwin/release/bundle/dmg/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_universal.dmg ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_universal.dmg
-          7z a -tzip ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_universal.app.zip ./src-tauri/target/universal-apple-darwin/release/bundle/macos/${{env.APP_NAME}}.app
-      - name: Prepare release files on ${{matrix.label}}
-        continue-on-error: true
-        if: matrix.os == 'windows-latest'
-        run: |
-          mv src-tauri/target/x86_64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x64${{matrix.executable_extension}}
-          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_x64_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x64.msi
-          mv src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_x64-setup.exe ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x64-setup.exe
-          mv src-tauri/target/i686-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x86${{matrix.executable_extension}}
-          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_x86_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x86.msi
-          mv src-tauri/target/i686-pc-windows-msvc/release/bundle/nsis/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_x86-setup.exe ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_x86-setup.exe
-          mv src-tauri/target/aarch64-pc-windows-msvc/release/${{env.APP_NAME}}${{matrix.executable_extension}} ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_arm64${{matrix.executable_extension}} || true
-          # mv src-tauri/target/aarch64-pc-windows-msvc/release/bundle/msi/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_arm64_en-US.msi ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_arm64.msi || true
-          mv src-tauri/target/aarch64-pc-windows-msvc/release/bundle/nsis/${{env.APP_NAME}}_${{ github.event.inputs.tag_version }}_arm64-setup.exe ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}_arm64-setup.exe || true
-
-      - name: Display structure of build files
-        run: |
-          ls -l .
-        
-      - name: 'Publish binary to release'
-        continue-on-error: true
-        uses: xresloader/upload-to-github-release@v1
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - uses: actions/setup-java@v4
         with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Tauri build
+        id: tauri-build
+        uses: liudonghua123/tauri-build-action@main
+        with:
+          project_name: ${{env.APP_NAME}}
+          identifier: com.${{env.APP_NAME}}.app
+          version: ${{ github.event.inputs.tag_version }}
+          frontend_dist: ../dist
+          icon: app-icon.png
+      - name: Display structure of build files
+        run: |
+          ls -la . tauri-build
+        shell: bash
+      - name: Publish binary to release
+        continue-on-error: true
+        uses: softprops/action-gh-release@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ github.event.inputs.tag_version }}
-          file: ${{env.APP_NAME}}-${{matrix.label}}-${{ github.event.inputs.tag_version }}*
-          tags: true
+          files: tauri-build/*
           draft: false
-          overwrite: true
+          prerelease: false
