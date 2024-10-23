@@ -1,5 +1,37 @@
 
-import { fetch, Body, ResponseType, Part, FilePart } from "@tauri-apps/api/http"
+import { fetch } from "@tauri-apps/plugin-http"
+
+// copied from https://github.com/tauri-apps/tauri/blob/%40tauri-apps/api-v1.6.0/tooling/api/src/http.ts
+
+const ResponseType = {1: 'JSON', 2: 'Text', 3: 'Binary', JSON: 1, Text: 2, Binary: 3}
+
+class Body {
+    constructor(type, payload) {
+        this.type = type;
+        this.payload = payload;
+    }
+    static form(data) {
+        return new Body('Form', data);
+    }
+    static json(data) {
+        return new Body('Json', data);
+    }
+    static text(value) {
+        return new Body('Text', value);
+    }
+    static bytes(bytes) {
+        // stringifying Uint8Array doesn't return an array of numbers, so we create one here
+        return new Body('Bytes', Array.from(bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : bytes));
+    }
+}
+
+interface FilePart<T> {
+  file: string | T
+  mime?: string
+  fileName?: string
+}
+
+type Part = string | Uint8Array | FilePart<Uint8Array>
 
 declare global {
   interface Window {
@@ -47,7 +79,7 @@ if (window.__TAURI__ && window.__TAURI__.http) {
         const tauriFetchRes = await fetch<string | object | ArrayBuffer>(url, {
           method,
           headers,
-          query: params,
+          parameters: params,
           body,
           responseType,
         })
