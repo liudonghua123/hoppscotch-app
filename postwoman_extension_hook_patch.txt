@@ -1,38 +1,6 @@
 
 import { fetch } from "@tauri-apps/plugin-http"
 
-// copied from https://github.com/tauri-apps/tauri/blob/%40tauri-apps/api-v1.6.0/tooling/api/src/http.ts
-
-const ResponseType = {1: 'JSON', 2: 'Text', 3: 'Binary', JSON: 1, Text: 2, Binary: 3}
-
-class Body {
-    constructor(type, payload) {
-        this.type = type;
-        this.payload = payload;
-    }
-    static form(data) {
-        return new Body('Form', data);
-    }
-    static json(data) {
-        return new Body('Json', data);
-    }
-    static text(value) {
-        return new Body('Text', value);
-    }
-    static bytes(bytes) {
-        // stringifying Uint8Array doesn't return an array of numbers, so we create one here
-        return new Body('Bytes', Array.from(bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : bytes));
-    }
-}
-
-interface FilePart<T> {
-  file: string | T
-  mime?: string
-  fileName?: string
-}
-
-type Part = string | Uint8Array | FilePart<Uint8Array>
-
 declare global {
   interface Window {
     __TAURI__?: any,
@@ -52,91 +20,44 @@ if (window.__TAURI__ && window.__TAURI__.http) {
       data,
     }: any): Promise<any> => {
       try {
-        // https://github.com/tauri-apps/tauri/blob/next/tooling/api/src/http.ts
-        // 1: JSON, 2: Text, 3: Binary
-        // set the default body to null, responseType to binary
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types
-        let body
-        let responseType = ResponseType.Binary
-        const contentType: string =
-          headers["content-type"] || headers["Content-Type"] || "text/plain"
-        // set body if data is not null
-        if (contentType.includes("json")) {
-          responseType = ResponseType.JSON
-          data && (body = Body.json(JSON.parse(data)))
-        } else if (contentType.includes("form")) {
-          responseType = ResponseType.Text
-          // https://github.com/tauri-apps/tauri/blob/dev/tooling/api/src/http.ts#L128
-          // https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsArrayBuffer
-          data && (body = Body.form(await normalizeFormData(data)))
-        } else if (contentType.includes("text")) {
-          responseType = ResponseType.Text
-          data && (body = Body.text(data))
-        } else {
-          responseType = ResponseType.Binary
-          data && (body = Body.bytes(data))
+        let body = data
+        if(method === 'GET' || method === 'HEAD') {
+          body = null
         }
-        const tauriFetchRes = await fetch<string | object | ArrayBuffer>(url, {
+        const startTime = Date.now()
+        const response = await fetch(url, {
           method,
           headers,
-          parameters: params,
           body,
-          responseType,
         })
-        console.info(`tauri fetch response`, tauriFetchRes)
-        const result =
-          typeof tauriFetchRes.data === "object"
-            ? JSON.stringify(tauriFetchRes.data)
-            : tauriFetchRes.data
+        const endTime = Date.now()
+        const responseData = await response.arrayBuffer()
+        const { headers: responseHeaders, status, statusText } = response
+        console.info(`tauri fetch response`, response)
         return {
-          ...tauriFetchRes,
-          data: new TextEncoder().encode(result),
-          statusText: "ok",
-          config: {},
+          ...response,
+          headers: Object.fromEntries(responseHeaders.entries()),
+          status,
+          statusText,
+          data: responseData,
+          config: {
+            timeData: {
+              startTime,
+              endTime,
+            }
+          },
         }
       } catch (error) {
         console.info(`tauri fetch got error: `, error)
         return {
-          status: 500,
           headers: {},
-          data: new TextEncoder().encode(`tauri fetch got error: ${error}`),
+          status: 500,
           statusText: "",
+          data: new TextEncoder().encode(`tauri fetch got error: ${error}`),
           config: {},
         }
       }
     },
     getVersion: () => ({ major: 0, minor: 1, patch: 0 }),
   }
-}
-
-async function readFile(file: File): Promise<[Uint8Array, string, string]> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () =>
-      resolve([
-        new Uint8Array(reader.result as ArrayBuffer),
-        file.type,
-        file.name,
-      ])
-    reader.onerror = reject
-    reader.readAsArrayBuffer(file)
-  })
-}
-
-async function normalizeFormData(
-  data: any
-): Promise<Record<string, string | Part>> {
-  // https://melvingeorge.me/blog/convert-html-form-tag-input-values-to-object-javascript
-  const formDataObject = Object.fromEntries(data.entries())
-  const normalizedFormData: Record<string, string | Part> = {}
-  for (const [key, value] of Object.entries(formDataObject)) {
-    if (value instanceof File) {
-      const [file, mime, fileName] = await readFile(value)
-      const filePart: FilePart<Uint8Array> = { file, mime, fileName }
-      normalizedFormData[key] = filePart
-    } else {
-      normalizedFormData[key] = value
-    }
-  }
-  return normalizedFormData
 }
