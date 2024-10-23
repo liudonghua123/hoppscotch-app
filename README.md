@@ -8,7 +8,7 @@ It support windows (x86, x64, arm64), linux (amd64, i386, arm64, armhf), macos (
 
 ## Downloads
 
-Current version: 24.9.1.
+Current version: 24.9.3.
 
 <table class="is-fullwidth">
 </thead>
@@ -21,34 +21,34 @@ Current version: 24.9.1.
     </td>
     <td>
       <span>64-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_x64.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_x64.exe">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_x64.msi">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_x64.msi">
         💿 MSI Installer
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_x64-setup.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_x64-setup.exe">
         💿 NSIS Installer
       </a><br />
       <span>32-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_x86.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_x86.exe">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_x86.msi">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_x86.msi">
         💿 MSI Installer
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_x86-setup.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_x86-setup.exe">
         💿 NSIS Installer
       </a><br />
       <span>arm64</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_arm64.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_arm64.exe">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_arm64_en-US.msi
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_arm64_en-US.msi
 ">
         💿 MSI Installer
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.1_arm64-setup.exe">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-windows-24.9.3_arm64-setup.exe">
         💿 NSIS Installer
       </a><br />
       <span>
@@ -63,24 +63,24 @@ Current version: 24.9.1.
     </td>
     <td>
       <span>Intel Processor</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.1_x64">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.3_x64">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.1_x64.dmg">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.3_x64.dmg">
         💿 DMG bundle
       </a><br />
       <span>Apple M1 Processor</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.1_aarch64">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.3_aarch64">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.1_aarch64.dmg">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.3_aarch64.dmg">
         💿 DMG bundle
       </a><br />
       <span><a href="https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary">Universal</a></span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.1_universal">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.3_universal">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.1_universal.dmg">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-macos-24.9.3_universal.dmg">
         💿 DMG bundle
       </a><br />
       <span>
@@ -99,49 +99,49 @@ Current version: 24.9.1.
     </td>
     <td>
       <span>64-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_amd64">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_amd64">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_amd64.AppImage">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_amd64.AppImage">
         💿 AppImage bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_amd64.deb">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_amd64.deb">
         💿 DEB bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1.x86_64.rpm">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3.x86_64.rpm">
         💿 RPM bundle
       </a><br />
       <span>32-bit</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_i386">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_i386">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_i386.AppImage">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_i386.AppImage">
         💿 AppImage bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_i386.deb">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_i386.deb">
         💿 DEB bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1.i386.rpm">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3.i386.rpm">
         💿 RPM bundle
       </a><br />
       <span>arm64</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_arm64">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_arm64">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_arm64.deb">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_arm64.deb">
         💿 DEB bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1.aarch64.rpm">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3.aarch64.rpm">
         💿 RPM bundle
       </a><br />
       <span>armv7</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_armhf">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_armhf">
         📦 Executable
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1_armhf.deb">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3_armhf.deb">
         💿 DEB bundle
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.1.armhfp.rpm">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-linux-24.9.3.armhfp.rpm">
         💿 RPM bundle
       </a><br />
       <span>
@@ -156,10 +156,10 @@ Current version: 24.9.1.
     </td>
     <td>
       <span>universal</span>
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-android-24.9.1-universal-release-unsigned.apk">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-android-24.9.3-universal-release-unsigned.apk">
         📦 APK
       </a> |
-      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-android-24.9.1-universal-release.aab">
+      <a href="https://github.com/liudonghua123/hoppscotch-app/releases/latest/download/hoppscotch-app-android-24.9.3-universal-release.aab">
         💿 AAB bundle
       </a><br />
       <span>By default the generated AAB and APK is universal, containing all supported targets.</span>
