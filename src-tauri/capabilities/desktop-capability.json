@@ -6,7 +6,6 @@
       "linux"
     ],
     "permissions": [
-      "global-shortcut:default",
       "store:default",
       "clipboard-manager:default"
     ]
