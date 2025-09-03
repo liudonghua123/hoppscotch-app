@@ -58,11 +58,10 @@ jobs:
           cat postwoman_extension_hook_patch.txt >> hoppscotch/packages/hoppscotch-common/src/platform/std/interceptors/extension.ts
           echo "patched ExtensionStrategy.ts"
           cat hoppscotch/packages/hoppscotch-common/src/platform/std/interceptors/extension.ts
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v2
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
         with:
-          node-version: 18.x
-          cache: 'npm'
+          node-version: 22.x
       - name: 'Install the root tauri dependences'
         run: |
           yarn install
@@ -115,11 +114,10 @@ jobs:
           unzip ${{env.APP_NAME}}-${{ github.event.inputs.tag_version }}.zip -d dist
       - name: Display structure of downloaded files
         run: ls -l . dist
-      - name: Use Node.js 18.x
-        uses: actions/setup-node@v2
+      - name: Use Node.js 22.x
+        uses: actions/setup-node@v4
         with:
-          node-version: 18.x
-          cache: 'yarn'
+          node-version: 22.x
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
